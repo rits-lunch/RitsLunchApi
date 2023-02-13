@@ -4,6 +4,8 @@ import (
 	"net/http"
 
 	"github.com/labstack/echo/v4"
+
+	"ritslunch_api/firebase"
 )
 
 func main() {
@@ -21,6 +23,7 @@ func getHello(c echo.Context) error {
 }
 
 func getAllShops(c echo.Context) error {
+	firebase.Test()
 	return c.String(http.StatusOK, "店舗一覧")
 }
 
