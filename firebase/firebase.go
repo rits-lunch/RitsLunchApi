@@ -26,7 +26,9 @@ func Test() {
 	fmt.Println("Connection done")
 	// 値の取得
 	collection := client.Collection("shop")
-	doc := collection.Doc("0001")
+	doc := collection.Doc("0001") //.Collection("foods").Doc("0001")
+	//collection2 := client.Collection("foods")
+	//doc := collection2.Doc("0001")
 	field, err := doc.Get(ctx)
 	if err != nil {
 		// fmt.Errorf("error get data: %v", err)
