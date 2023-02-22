@@ -2,6 +2,7 @@ package main
 
 import (
 	"net/http"
+	"os"
 	
 	"github.com/labstack/echo/v4"
 )
@@ -11,5 +12,9 @@ func main() {
 	e.GET("/", func(c echo.Context) error {
 		return c.String(http.StatusOK, "hello RitsLunch")
 	})
-	e.Logger.Fatal(e.Start(":3000"))
+	port := os.Getenv("PORT")
+    if port == "" {
+		port = "8080"
+    }
+	e.Logger.Fatal(e.Start(":"+port))
 }
