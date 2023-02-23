@@ -1,65 +1,55 @@
 package firebase
 
 import (
+	"context"
 	"fmt"
 
-	firebase "firebase.google.com/go"
-	"golang.org/x/net/context"
+	"cloud.google.com/go/firestore"
 	"google.golang.org/api/option"
 )
 
 type shop struct {
-	shopName    string
-	isActive    bool
-	description string
-	items       []string
+	ShopName    string   `firestore:"shopName"`
+	IsActive    bool     `firestore:"isActive"`
+	Description string   `firestore:"description"`
+	Items       []string `firestore:"items"`
+}
+type shopitem struct {
+	Image string `firestore:"image"`
+	Price int    `firestore:"price"`
+	Name  string `firestore:"name"`
 }
 
 func Test() {
 	// クライアント接続
-	opt := option.WithCredentialsFile("key.json")
 	ctx := context.Background()
-	app, err := firebase.NewApp(ctx, nil, opt)
-
+	opt := option.WithCredentialsFile("key.json")
+	client, err := firestore.NewClient(ctx, "ritslunch-f747e", opt)
 	if err != nil {
-		// fmt.Errorf("error initializing app: %v", err)
-		fmt.Print("Hello world!")
+		fmt.Printf("error get data: %v", err)
 	}
-	client, err := app.Firestore(ctx)
-	if err != nil {
-		// fmt.Errorf("error initializing client: %v", err)
-		fmt.Print("Hello world!")
-	}
-	defer client.Close()
-	fmt.Println("Connection done")
-	// 値の取得
 	collection := client.Collection("shop")
-	doc := collection.Doc("0001") //.Collection("foods").Doc("0001")
-	//collection = client.Collection("item")
-	//doc = collection.Doc("EIsr8JFtrvSMk5DVydn6")
-	field, err := doc.Get(ctx)
+	datasnap, err := collection.Doc("0001").Get(ctx)
+	// fmt.Printf("%#v",datasnap.Data())
 	if err != nil {
-		// fmt.Errorf("error get data: %v", err)
-		fmt.Print("Hello world!")
+		fmt.Printf("error get data: %v", err)
 	}
+	var shop = shop{}
+	if err := datasnap.DataTo(&shop); err != nil {
+		fmt.Printf("error get data: %v", err)
+	}
+	fmt.Printf("%#v \n", shop)
 
-	//var dataShop shop
-	dataShop := field.Data()
-	for key, value := range dataShop {
-		fmt.Printf("key: %v, value: %v\n", key, value)
-	}
+	for _, itemid := range shop.Items {
+		var item = shopitem{}
+		collection := client.Collection("items")
+		datasnap, err := collection.Doc(itemid).Get(ctx)
+		if err != nil {
+			fmt.Printf("error get data: %v", err)
+		}
+		if err := datasnap.DataTo(&item); err != nil {
 
-	collectionItem := client.Collection("items")
-	docItem := collectionItem.Doc((dataShop.(shop)).items[0]) //.Collection("foods").Doc("0001")
-	//collection = client.Collection("item")
-	//doc = collection.Doc("EIsr8JFtrvSMk5DVydn6")
-	fieldItem, errItem := docItem.Get(ctx)
-	if errItem != nil {
-		// fmt.Errorf("error get data: %v", err)
-		fmt.Print("Hello world!")
-	}
-	dataItem := fieldItem.Data()
-	for key, value := range dataItem {
-		fmt.Printf("key: %v, value: %v\n", key, value)
+		}
+		fmt.Printf("%#v \n", item)
 	}
 }
